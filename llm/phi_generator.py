@@ -6,10 +6,11 @@ from config.settings import DEVICE, MAX_NEW_TOKENS, TEMPERATURE
 from config.model_config import LLM_MODELS
 
 
-class LlamaGenerator(BaseLLM):
+class PhiGenerator(BaseLLM):
+
     def __init__(self):
 
-        model_name = LLM_MODELS['llama']
+        model_name = LLM_MODELS["phi"]
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -20,18 +21,11 @@ class LlamaGenerator(BaseLLM):
         )
 
     def generate(self, prompt: str):
-        
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
 
-        input_ids = self.tokenizer.apply_chat_template(
-            messages, 
-            return_tensors="pt"
-        ).to(DEVICE)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(DEVICE)
 
-        outputs= self.model.generate(
-            input_ids,
+        outputs = self.model.generate(
+            **inputs,
             max_new_tokens=MAX_NEW_TOKENS,
             temperature=TEMPERATURE,
             do_sample=True
