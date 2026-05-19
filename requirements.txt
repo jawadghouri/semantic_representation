@@ -1,0 +1,14 @@
+torch
+transformers
+accelerate
+sentencepiece
+sentence-transformers
+faiss-cpu
+numpy
+scikit-learn
+matplotlib
+seaborn
+umap-learn
+tqdm
+scipy
+pandas
