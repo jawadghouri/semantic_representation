@@ -218,6 +218,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-./data/raw_outputs/llama_output.json
-./data/raw_outputs/mistral_output.json
-./data/raw_outputs/phi_output.json
+./data/raw_outputs/llama_outputs.json
+./data/raw_outputs/mistral_outputs.json
+./data/raw_outputs/phi_outputs.json
