@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+test/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -216,3 +217,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+./data/raw_output/llama_output.json
+./data/raw_output/mistral_output.json
+./data/raw_output/phi_output.json

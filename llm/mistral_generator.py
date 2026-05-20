@@ -6,11 +6,11 @@ from config.settings import DEVICE, MAX_NEW_TOKENS, TEMPERATURE
 from config.model_config import LLM_MODELS
 
 
-class PhiGenerator(BaseLLM):
+class MistralGenerator(BaseLLM):
 
     def __init__(self):
 
-        model_name = LLM_MODELS["phi"]
+        model_name = LLM_MODELS["mistral"]
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -28,7 +28,9 @@ class PhiGenerator(BaseLLM):
             **inputs,
             max_new_tokens=MAX_NEW_TOKENS,
             temperature=TEMPERATURE,
-            do_sample=True
+            do_sample=True,
+            eos_token_id=self.tokenizer.eos_token_id,
+            pad_token_id=self.tokenizer.eos_token_id
         )
 
         response = self.tokenizer.decode(
