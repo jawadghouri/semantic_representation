@@ -17,7 +17,7 @@ class MiniLMEmbedder(BaseEmbedder):
             texts,
             batch_size=32,
             show_progress_bar=True,
-            normalize_embeddings=True
+            normalize_embeddings=False
         )
 
         return embeddings
