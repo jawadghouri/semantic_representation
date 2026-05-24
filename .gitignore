@@ -118,3 +118,6 @@ __marimo__/
 
 data/raw_outputs/*
 !data/raw_outputs/.gitkeep
+
+data/processed/embeddings/*
+!data/processed/embeddings/.gitkeep
