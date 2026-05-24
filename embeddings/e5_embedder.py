@@ -8,7 +8,7 @@ class E5Embedder(BaseEmbedder):
     def __init__(self):
 
         self.model = SentenceTransformer(
-            "intfloat/e5-small-v2"
+            "intfloat/e5-large-v2"
         )
 
     def encode(self, texts):
