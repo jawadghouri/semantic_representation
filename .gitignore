@@ -121,3 +121,6 @@ data/raw_outputs/*
 
 data/processed/embeddings/*
 !data/processed/embeddings/.gitkeep
+
+data/processed/faiss/*
+!data/processed/faiss/.gitkeep
