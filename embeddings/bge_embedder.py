@@ -8,7 +8,7 @@ class BGEEmbedder(BaseEmbedder):
     def __init__(self):
 
         self.model = SentenceTransformer(
-            "BAAI/bge-small-en-v1.5"
+            "BAAI/bge-base-en-v1.5"
         )
 
     def encode(self, texts):

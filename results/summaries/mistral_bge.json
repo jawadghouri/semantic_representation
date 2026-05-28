@@ -1,0 +1,8 @@
+{
+    "num_vectors": 5,
+    "dimension": 768,
+    "mean_norm": 1.0,
+    "std_norm": 5.331201435865296e-08,
+    "min_norm": 1.0,
+    "max_norm": 1.0000001192092896
+}
