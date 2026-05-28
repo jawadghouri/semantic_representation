@@ -124,3 +124,12 @@ data/processed/embeddings/*
 
 data/processed/faiss/*
 !data/processed/faiss/.gitkeep
+
+results/figures/*
+!results/figures/.gitkeep
+
+results/metrics/*
+!results/metrics/.gitkeep
+
+results/reports/*
+!results/reports/.gitkeep
