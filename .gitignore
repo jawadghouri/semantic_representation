@@ -125,7 +125,7 @@ data/processed/embeddings/*
 data/processed/faiss/*
 !data/processed/faiss/.gitkeep
 
-.results/*
+results/*
 
 results/figures/*
 !results/figures/.gitkeep
