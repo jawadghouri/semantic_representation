@@ -1,0 +1,107 @@
+[
+  {
+    "prompt_id": "P1",
+    "prompt": "Who won the Nobel Peace Prize in 2020?",
+    "labels": [
+      "H",
+      "H",
+      "G",
+      "G",
+      "G",
+      "G",
+      "H",
+      "H",
+      "H",
+      "H",
+      "G",
+      "H",
+      "H",
+      "G",
+      "H"
+    ]
+  },
+  {
+    "prompt_id": "P2",
+    "prompt": "Which country won the FIFA World Cup in 2022?",
+    "labels": [
+      "G",
+      "H",
+      "G",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H"
+    ]
+  },
+  {
+    "prompt_id": "P3",
+    "prompt": "Which film won the Academy Award for Best Picture in 2020?",
+    "labels": [
+      "H",
+      "H",
+      "G",
+      "G",
+      "G",
+      "H",
+      "H",
+      "H",
+      "H",
+      "H",
+      "G",
+      "H",
+      "G",
+      "G",
+      "H"
+    ]
+  },
+  {
+    "prompt_id": "P4",
+    "prompt": "Who won the Grammy Award for Album of the Year in 2021?",
+    "labels": [
+      "G",
+      "G",
+      "H",
+      "H",
+      "H",
+      "G",
+      "G",
+      "G",
+      "H",
+      "G",
+      "H",
+      "H",
+      "H",
+      "H",
+      "G"
+    ]
+  },
+  {
+    "prompt_id": "P5",
+    "prompt": "Which team won the UEFA Champions League in 2022?",
+    "labels": [
+      "G",
+      "G",
+      "H",
+      "G",
+      "H",
+      "H",
+      "G",
+      "G",
+      "G",
+      "G",
+      "G",
+      "G",
+      "H",
+      "G",
+      "G"
+    ]
+  }
+]
