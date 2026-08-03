@@ -6,6 +6,8 @@ from utils.io_utils import load_json, save_numpy
 
 from tqdm import tqdm
 
+from utils.norm_utils import check_embeddings_normalization
+
 
 # ---------------------------------------------------
 # LOAD RAW OUTPUTS
@@ -75,4 +77,12 @@ for llm_name, filepath in model_files.items():
 
         print(f"Saved: {output_path}")
 
+prompts = load_json("data/prompts/prompts.json")
+prompt_texts = [p["prompt"] if isinstance(p, dict) else p for p in prompts]
+
+for embed_name, embedder in embedders.items():
+    embeddings = embedder.encode(prompt_texts)
+    save_numpy(embeddings, f"data/processed/embeddings/prompt_{embed_name}.npy")
+
+check_embeddings_normalization("data/processed/embeddings/")
 print("\nEmbedding pipeline complete.")

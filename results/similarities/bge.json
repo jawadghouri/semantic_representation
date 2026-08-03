@@ -1,0 +1,21 @@
+{
+    "embedding_model": "bge",
+    "results": [
+        {
+            "model": "prompts",
+            "distance": 0.0
+        },
+        {
+            "model": "phi",
+            "distance": 0.4483277499675751
+        },
+        {
+            "model": "mistral",
+            "distance": 0.46876925230026245
+        },
+        {
+            "model": "llama",
+            "distance": 0.5061939358711243
+        }
+    ]
+}

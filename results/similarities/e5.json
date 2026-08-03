@@ -1,0 +1,21 @@
+{
+    "embedding_model": "e5",
+    "results": [
+        {
+            "model": "prompts",
+            "distance": 0.0
+        },
+        {
+            "model": "phi",
+            "distance": 0.4541618824005127
+        },
+        {
+            "model": "llama",
+            "distance": 0.4880795180797577
+        },
+        {
+            "model": "mistral",
+            "distance": 0.5149160623550415
+        }
+    ]
+}

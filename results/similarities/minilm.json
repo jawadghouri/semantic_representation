@@ -1,0 +1,21 @@
+{
+    "embedding_model": "minilm",
+    "results": [
+        {
+            "model": "prompts",
+            "distance": 0.0
+        },
+        {
+            "model": "phi",
+            "distance": 0.6090026497840881
+        },
+        {
+            "model": "mistral",
+            "distance": 0.7187052965164185
+        },
+        {
+            "model": "llama",
+            "distance": 0.8315765857696533
+        }
+    ]
+}
