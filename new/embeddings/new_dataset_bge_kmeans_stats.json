@@ -1,0 +1,10 @@
+{
+  "k": 3,
+  "silhouette_score": 0.10686151683330536,
+  "davies_bouldin_score": 2.7392437758585046,
+  "inertia": 9958.9970703125,
+  "cluster_centers_shape": [
+    3,
+    768
+  ]
+}

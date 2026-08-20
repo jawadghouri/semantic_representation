@@ -1,0 +1,32 @@
+{
+  "0": {
+    "size": 10,
+    "llm_distribution": {
+      "chatgpt": 2,
+      "claude": 2,
+      "deepseek": 2,
+      "gemini": 2,
+      "grok": 2
+    }
+  },
+  "1": {
+    "size": 35,
+    "llm_distribution": {
+      "chatgpt": 7,
+      "claude": 7,
+      "deepseek": 7,
+      "gemini": 7,
+      "grok": 7
+    }
+  },
+  "2": {
+    "size": 35,
+    "llm_distribution": {
+      "chatgpt": 7,
+      "claude": 7,
+      "deepseek": 7,
+      "gemini": 7,
+      "grok": 7
+    }
+  }
+}
