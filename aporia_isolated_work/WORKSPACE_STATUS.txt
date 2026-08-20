@@ -1,0 +1,289 @@
+================================================================================
+ISOLATED APORIA WORKSPACE — SETUP VERIFICATION
+================================================================================
+Date: 2026-08-18
+Status: READY TO USE ✓
+
+================================================================================
+ISOLATION VERIFIED
+================================================================================
+
+✓ Main project git status: UNCHANGED
+  - No modifications to existing files
+  - aporia_isolated_work/ appears as untracked (expected)
+  - Safe to commit/work normally on main project
+
+✓ Folder structure created
+  - 7 Python modules (4 visualization, 2 analysis, 1 master runner)
+  - 5 documentation files
+  - 3 data/output directories
+  - Complete configuration framework
+
+================================================================================
+FOLDER STRUCTURE
+================================================================================
+
+aporia_isolated_work/
+├── DOCUMENTATION
+│   ├── 00_START_HERE.md                  ← Read this first!
+│   ├── QUICK_START.md                    ← 5-minute setup
+│   ├── WORKSPACE_SETUP.md                ← Detailed config
+│   ├── README.md                         ← Project overview
+│   └── WORKSPACE_STATUS.txt              ← This file
+│
+├── EXECUTABLE
+│   └── run_all_analysis.py               ← Master runner (python run_all_analysis.py)
+│
+├── ANALYSIS (Core algorithms)
+│   ├── analysis/__init__.py
+│   ├── analysis/prompt_response_analysis.py
+│   └── analysis/aporia_framework.py
+│
+├── VISUALIZATION (4 plot types)
+│   ├── visualization/__init__.py
+│   ├── visualization/heatmap_plots.py    ← Distance matrices (model-centric)
+│   ├── visualization/pca_plots_2d.py     ← 2D PCA (paragraph-centric, Option A)
+│   ├── visualization/pca_plots_3d.py     ← 3D PCA (paragraph-centric, Option A)
+│   └── visualization/bar_charts.py       ← Prompt-response distances
+│
+├── CONFIGURATION (Single file to edit)
+│   ├── config/__init__.py
+│   └── config/groups.py                  ← EDIT THIS for your experiment
+│
+└── DATA & OUTPUT
+    ├── data/processed/embeddings/        ← Your .npy files go here
+    └── plots/                            ← PNG outputs appear here
+
+================================================================================
+QUICK START (3 STEPS)
+================================================================================
+
+Step 1: Activate environment
+  $ cd /home_4TB/taqu2784/semantic_representation
+  $ source venv/bin/activate
+  $ cd aporia_isolated_work
+
+Step 2: Add your embeddings
+  $ cp your_embeddings/*.npy data/processed/embeddings/
+  
+Step 3: Configure & run
+  Edit: config/groups.py (set GROUP_CONFIG to match your data)
+  Run:  python run_all_analysis.py
+
+All plots go to: plots/
+
+================================================================================
+WHAT'S GENERATED
+================================================================================
+
+4 plot types (each with normalized + unnormalized versions):
+
+1. HEATMAPS (model-centric)
+   └─ {model}_heatmap_{norm/unnorm}.png
+   └─ Shows: pairwise distances between all responses
+   └─ Use: Verify group structure in embedding space
+
+2. 2D PCA (paragraph-centric, Option A)
+   └─ {R_id}_pca2d_{norm/unnorm}.png
+   └─ Shows: where each response sits in model's 2D PCA space
+   └─ Use: Quick 2D visualization of response positions
+
+3. 3D PCA (paragraph-centric, Option A)
+   └─ {R_id}_pca3d_{norm/unnorm}.png
+   └─ Shows: where each response sits in model's 3D PCA space
+   └─ Use: Reveal hidden structure not visible in 2D
+
+4. BAR CHARTS (prompt-response distances)
+   └─ {llm}_{model}_prompt_response_{norm/unnorm}.png
+   └─ Shows: distances from prompt to each response
+   └─ Use: Measure which LLM/embedder best preserves prompt topic
+
+================================================================================
+CONFIGURATION
+================================================================================
+
+File: config/groups.py
+
+Three pre-built examples:
+  • GROUP_CONFIG_R1_R18: 18 responses, 3 groups (original context-sensitivity)
+  • GROUP_CONFIG_9_PROMPTS: 9 responses, 3 groups (current live pipeline)
+  • GROUP_CONFIG_CUSTOM: Template for your own setup
+
+ACTIVE: Currently set to GROUP_CONFIG_R1_R18 (example)
+
+Edit to your experiment:
+  GROUP_CONFIG = [
+      {"name": "Group 1", "ids": ["R1", "R2", "R3"], "color": "steelblue"},
+      {"name": "Group 2", "ids": ["R4", "R5", "R6"], "color": "tomato"},
+      # ... add more groups as needed
+  ]
+
+================================================================================
+KEY FEATURES
+================================================================================
+
+✓ FLEXIBLE GROUPING
+  - Works with ANY number of groups, ANY sizes, ANY names
+  - Change once in config/groups.py, all plots update
+  - Supports your current setup + future experiments
+
+✓ DUAL EMBEDDING SUPPORT
+  - Processes normalized AND unnormalized automatically
+  - No manual file juggling needed
+  - Just name normalized files with _norm suffix
+
+✓ ROBUST ERROR HANDLING
+  - Missing files skipped gracefully (no crashes)
+  - Insufficient data → clear warnings but continues
+  - Bad file formats → caught and reported
+
+✓ PUBLICATION-READY OUTPUT
+  - 200 DPI PNG (suitable for papers/presentations)
+  - Proper legends, labels, group colors
+  - Auto-sized for readability (adapts to N responses)
+
+✓ COMPLETE ISOLATION
+  - Main project completely untouched
+  - No .git interference
+  - Can delete entire folder without impact
+  - Safe to experiment and iterate
+
+================================================================================
+FILE NAMING CONVENTION
+================================================================================
+
+Expected format for embeddings:
+  {response_id}_{model_name}.npy              (unnormalized)
+  {response_id}_{model_name}_norm.npy         (normalized, optional)
+
+Example:
+  R1_bge.npy
+  R1_bge_norm.npy
+  R1_minilm.npy
+  R1_minilm_norm.npy
+  R1_e5.npy
+  R1_e5_norm.npy
+  prompts_bge.npy                             (optional, for prompt-response analysis)
+
+The pipeline auto-detects which models are available based on files found.
+
+================================================================================
+RUNNING THE ANALYSIS
+================================================================================
+
+All in one command (recommended):
+  $ python run_all_analysis.py
+  
+  This runs:
+    1. Heatmap generation
+    2. 2D PCA plots
+    3. 3D PCA plots
+    4. Bar charts
+    
+  All in sequence with progress output.
+
+Or run individual modules:
+  $ python -m visualization.heatmap_plots
+  $ python -m visualization.pca_plots_2d
+  $ python -m visualization.pca_plots_3d
+  $ python -m visualization.bar_charts
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Issue: "ModuleNotFoundError: No module named 'visualization'"
+→ Fix: export PYTHONPATH="/path/to/aporia_isolated_work:$PYTHONPATH"
+→ Or:  python -m visualization.heatmap_plots (use -m flag)
+
+Issue: "FileNotFoundError: No such file or directory: 'data/processed/embeddings/'"
+→ Fix: Verify embeddings are copied/symlinked to data/processed/embeddings/
+→ Check: ls -la data/processed/embeddings/
+
+Issue: "Warning: not enough data for 2D/3D PCA"
+→ Fix: Need at least 2 embeddings per model (heatmap), 3+ for 3D PCA
+→ Check: All your response IDs are in config/groups.py GROUP_CONFIG?
+
+Issue: Plots are blank or missing annotations
+→ Fix: Verify GROUP_CONFIG IDs match your file names exactly (case-sensitive)
+→ Check: R1 in config must match R1_bge.npy in folder
+
+Issue: "matplotlib.figure.Figure" errors or slow performance
+→ Note: Normal for 100+ responses; heatmap annotation O(N²)
+→ Solution: Reduce figsize or number of annotated values for large datasets
+
+================================================================================
+PYTHON MODULES SUMMARY
+================================================================================
+
+CORE ANALYSIS (analysis/)
+  • aporia_framework.py
+    - APORIADetector class for hallucination detection
+    - Geometric clustering via KMeans
+    - Fisher Linear Discriminant for cluster validation
+    - Methods: fit(), detect_outliers(), cluster_statistics(), fisher_projection()
+  
+  • prompt_response_analysis.py
+    - compute_prompt_response_distances()
+    - compute_statistics()
+    - rank_responses_by_proximity()
+
+VISUALIZATION (visualization/)
+  • heatmap_plots.py
+    - plot_all_models() - master function
+    - Flexible GROUP_CONFIG-driven boundaries
+    - Works with unnormalized + normalized
+  
+  • pca_plots_2d.py
+    - plot_paragraph_centric_2d() - per-response 2D scatter
+    - Separate PCA per model (no cross-distortion)
+    - Option A (recommended approach)
+  
+  • pca_plots_3d.py
+    - plot_paragraph_centric_3d() - per-response 3D scatter
+    - Extends Option A to 3D
+    - Adjustable viewing angles (elev, azim)
+  
+  • bar_charts.py
+    - plot_all_combinations() - prompt-response bar charts
+    - Supports LLM + embedder combinations
+    - Highlights min/max distances
+
+CONFIGURATION (config/)
+  • groups.py
+    - GROUP_CONFIG definitions (edit this!)
+    - Model names, data paths, PCA hyperparameters
+    - Pre-built examples for common setups
+
+EXECUTION (root)
+  • run_all_analysis.py
+    - Master runner orchestrating all 4 plot types
+    - Environment validation
+    - Progress reporting
+    - Execution summary
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. READ: 00_START_HERE.md (overview)
+2. READ: QUICK_START.md (5-minute setup)
+3. COPY: Your embeddings to data/processed/embeddings/
+4. EDIT: config/groups.py to match your experiment
+5. RUN: python run_all_analysis.py
+6. VIEW: Check plots/ for PNG outputs
+7. ITERATE: Adjust config, re-run as needed
+
+================================================================================
+REMEMBER
+================================================================================
+
+✓ This workspace is COMPLETELY ISOLATED from main project
+✓ Safe to experiment, iterate, make mistakes
+✓ No impact on existing work or git history
+✓ Can be deleted entirely without consequences
+✓ Results can be integrated to main project whenever you want
+
+Ready to start? Open 00_START_HERE.md →
+
+================================================================================

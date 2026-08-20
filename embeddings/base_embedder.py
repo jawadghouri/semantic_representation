@@ -8,11 +8,19 @@ class BaseEmbedder(ABC):
         # 1. Load Tokenizer & Model
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name, **kwargs)
-        
-        # 2. Set Device & Eval Mode
+
+        # 2. Strip Normalize layers to get raw (unnormalized) embeddings
+        keys_to_remove = [
+            k for k, v in self.model._modules.items()
+            if type(v).__name__ == "Normalize"
+        ]
+        for k in keys_to_remove:
+            self.model._modules.pop(k)
+
+        # 3. Set Device & Eval Mode
         self.device = torch.device(
-            "cuda" if torch.cuda.is_available() 
-            else "mps" if torch.backends.mps.is_available() 
+            "cuda" if torch.cuda.is_available()
+            else "mps" if torch.backends.mps.is_available()
             else "cpu"
         )
         self.model.to(self.device)
