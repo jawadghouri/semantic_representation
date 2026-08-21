@@ -85,10 +85,23 @@ def main():
         embeddings = embed_with_model(embedder, texts, model_name)
         results[model_name] = embeddings
 
-        # Save to numpy file
+        # Save unnormalized embeddings
+        output_file_unnorm = output_dir / f"new_dataset_{model_name.lower()}_unnormalized.npy"
+        np.save(output_file_unnorm, embeddings)
+        print(f"✓ Saved unnormalized to: {output_file_unnorm}")
+
+        # Normalize embeddings (L2 normalization)
+        embeddings_normalized = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
+
+        # Save normalized embeddings
+        output_file_norm = output_dir / f"new_dataset_{model_name.lower()}_normalized.npy"
+        np.save(output_file_norm, embeddings_normalized)
+        print(f"✓ Saved normalized to: {output_file_norm}")
+
+        # Also keep original filename for backward compatibility
         output_file = output_dir / f"new_dataset_{model_name.lower()}.npy"
         np.save(output_file, embeddings)
-        print(f"✓ Saved to: {output_file}")
+        print(f"✓ Saved (original) to: {output_file}")
 
     # Save metadata
     metadata_file = output_dir / "new_dataset_metadata.json"
