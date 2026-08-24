@@ -1,0 +1,17 @@
+[
+    {
+        "id": "R1",
+        "constraint": "similar context, different synonyms",
+        "response": "Climate change is one of the most pressing challenges facing humanity today. Rising global temperatures are causing glaciers to melt and sea levels to rise at an alarming rate. Governments and individuals must work together to reduce carbon emissions and transition to renewable energy sources before irreversible damage occurs."
+    },
+    {
+        "id": "R2",
+        "constraint": "similar context, different synonyms",
+        "response": "Global warming stands as one of the most critical issues confronting mankind in the modern era. Increasing worldwide temperatures are resulting in ice caps shrinking and ocean levels climbing at a concerning pace. Authorities and citizens must collaborate to cut greenhouse gases and shift toward sustainable power alternatives before permanent harm is done."
+    },
+    {
+        "id": "R3",
+        "constraint": "similar context, different synonyms",
+        "response": "The climate crisis represents one of the most significant threats facing civilization at present. Escalating planetary temperatures are leading to polar ice diminishing and coastal waters encroaching at a troubling speed. Nations and communities must unite to lower emissions and adopt clean energy solutions before lasting destruction takes hold."
+    }
+]

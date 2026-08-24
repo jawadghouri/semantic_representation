@@ -1,0 +1,17 @@
+[
+    {
+        "id": "R4",
+        "constraint": "different context, similar wording",
+        "response": "The patient was administered a standard dosage of antibiotics following the surgical procedure. Recovery is expected within two to three weeks, provided the prescribed medication schedule is strictly followed. A follow-up appointment has been scheduled to monitor progress and assess any complications."
+    },
+    {
+        "id": "R5",
+        "constraint": "different context, similar wording",
+        "response": "The student was given a standard set of reading materials following the orientation session. Completion is expected within two to three weeks, provided the assigned coursework schedule is strictly followed. A review meeting has been scheduled to monitor understanding and assess any difficulties."
+    },
+    {
+        "id": "R6",
+        "constraint": "different context, similar wording",
+        "response": "The employee was assigned a standard series of training modules following the onboarding process. Proficiency is expected within two to three weeks, provided the designated learning schedule is strictly followed. A check-in session has been scheduled to monitor development and assess any challenges."
+    }
+]

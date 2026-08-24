@@ -1,0 +1,17 @@
+[
+    {
+        "id": "R7",
+        "constraint": "different context, different wording",
+        "response": "Quantum entanglement describes a phenomenon where two particles become correlated in such a way that the quantum state of one instantly influences the other, regardless of the distance separating them. This property has profound implications for quantum computing and cryptography, potentially enabling communication systems that are theoretically impossible to intercept."
+    },
+    {
+        "id": "R8",
+        "constraint": "different context, different wording",
+        "response": "The Renaissance was a cultural and intellectual movement that began in 14th century Italy, marking the transition from medieval to early modern Europe. It was characterized by a renewed interest in classical Greek and Roman philosophy, art, and science, giving rise to figures such as Leonardo da Vinci, Michelangelo, and Galileo."
+    },
+    {
+        "id": "R9",
+        "constraint": "different context, different wording",
+        "response": "Sourdough bread derives its distinctive tangy flavor from a fermentation process driven by wild yeast and lactic acid bacteria naturally present in the starter culture. Unlike commercially yeasted breads, sourdough undergoes a slow fermentation that breaks down gluten structures, making it easier to digest and lending it a complex, layered taste profile."
+    }
+]
