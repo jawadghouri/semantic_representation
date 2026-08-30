@@ -1,499 +1,277 @@
-# Semantic Representation of LLM Outputs
+# K-Means Clustering with PCA Visualization
 
-## Project Overview
+A comprehensive pipeline for analyzing LLM response embeddings using K-Means clustering and Principal Component Analysis (PCA). This project generates embedding vectors from text responses, clusters them in high-dimensional space, and produces interactive 2D and 3D visualizations with covariance ellipses/ellipsoids.
 
-This project investigates **how different Large Language Models (LLMs) represent information semantically**, measured through embedding distances and clustering analysis. By generating responses from multiple LLMs to the same prompts, encoding them with various embedding models, and analyzing their spatial relationships, we gain insights into semantic similarity/diversity across models.
+## Overview
 
-### Core Research Question
+This pipeline processes text responses from multiple large language models (LLMs) and constraint-based datasets, converts them into semantic embeddings, applies unsupervised K-Means clustering, and visualizes the results using PCA projection with statistical cluster boundaries.
 
-**Do Llama, Mistral, and Phi produce semantically similar or different responses to the same prompt?**
+### Key Features
 
-This is measured through:
-- **Embedding distances** between LLM responses and prompts
-- **Clustering patterns** in embedding space
-- **Inter/intra class separability** via discriminant analysis
-- **Multi-embedder robustness** across different embedding dimensions
+- **Multi-Embedder Support**: Generate embeddings using MiniLM, BGE, and E5 models
+- **Flexible Input Handling**: Support for single responses, multiple responses, and multi-model responses
+- **Normalization Control**: Choose between normalized and unnormalized embeddings
+- **Dual Clustering Approach**: K-Means clustering on original high-dimensional embeddings with PCA visualization
+- **Advanced Visualizations**: 2D and 3D plots with covariance ellipses/ellipsoids for cluster regions
+- **Covariance Estimation**: Statistical confidence regions using eigenvalue decomposition
 
----
-
-## Four-Stage Pipeline Architecture
-
-The project implements a linear, reproducible pipeline that transforms text prompts into quantitative semantic similarity metrics.
-
-### Stage 1: Text Generation
-**File:** `pipelines/run_generation.py`
-
-Generates responses from three LLMs to input prompts.
-
-**LLM Models:**
-- Llama: `meta-llama/Llama-3.1-8B-Instruct`
-- Mistral: `mistralai/Mistral-7B-Instruct-v0.2`
-- Phi: `microsoft/Phi-3-mini-4k-instruct`
-
-**Input:**
-- Prompts from `data/prompts/prompts.json`
-
-**Output:**
-- `data/raw_outputs/{llama,mistral,phi}_outputs.json`
-  - Format: JSON with prompt text and 200-token responses per model
-
-**Configuration:**
-- Device: CUDA (GPU required)
-- Max tokens: 200
-- Temperature: 0.7 (for response diversity)
-- VRAM management: Sequential model loading with cache purging between models
-
----
-
-### Stage 2: Embedding
-**File:** `pipelines/run_embeddings.py`
-
-Encodes LLM responses and original prompts using multiple embedding models.
-
-**Embedding Models:**
-- **MiniLM** (`all-MiniLM-L6-v2`): 384-dim, mean pooling
-- **BGE** (`BAAI/bge-base-en-v1.5`): 768-dim, CLS pooling
-- **E5** (`intfloat/e5-large-v2`): 1024-dim, mean pooling with "passage:" prefix
-
-**Output Structure:**
-```
-data/processed/embeddings/
-├── {llm}_{embedder}_{prompt_id}.npy    # Response embeddings
-└── {embedder}_prompts_{prompt_id}.npy   # Prompt embeddings
-```
-
-**Critical Design Choice: Unnormalized Embeddings**
-- Embeddings are kept as **raw L2-norm vectors** (NOT normalized to unit sphere)
-- **Euclidean distance** is the distance metric (NOT cosine similarity)
-- Verification: `utils/norm_utils.py` confirms `✅ UNNORMALIZED`
-- **Why:** Allows geometric analysis of response clustering in embedding space
-
----
-
-### Stage 3: FAISS Indexing
-**File:** `pipelines/run_faiss.py`
-
-Builds efficient vector indexes for semantic retrieval.
-
-**Index Type:** `faiss.IndexFlatL2` (Euclidean L2 distance)
-
-**Output:**
-```
-data/processed/faiss/
-└── {llm}_{embedder}_{prompt_id}.index
-```
-
-**Purpose:** Enables fast nearest-neighbor retrieval of semantically similar responses
-
----
-
-### Stage 4: Analysis & Visualization
-
-#### Analysis
-**File:** `pipelines/run_analysis.py`
-
-Computes semantic similarity metrics between prompts and LLM responses.
-
-**Metrics Computed:**
-- Euclidean distance from prompt embedding to each response embedding
-- Mean, std, min, max distances per LLM
-- Inter-model distance comparisons
-
-**Output:**
-```
-results/similarities/
-└── {llm}_{embedder}_distances.json
-```
-
-**Example Result:**
-```json
-{
-  "prompt": "Explain how a car engine works.",
-  "embedder": "all-MiniLM-L6-v2",
-  "llama_mean_distance": 4.23,
-  "mistral_mean_distance": 4.78,
-  "phi_mean_distance": 5.12
-}
-```
-
-#### Visualization
-**File:** `pipelines/run_visualization.py`
-
-Generates publication-ready visualizations of semantic relationships.
-
-**Chart Types:**
-1. **Bar plots** - Mean distances per LLM/embedder
-2. **Heatmaps** - Pairwise distance matrices showing response clustering
-3. **UMAP plots** - 2D projections of high-dimensional embedding space
-
-**Output:**
-```
-results/figures/
-├── bar_charts/
-├── heatmaps/
-└── umap_plots/
-```
-
----
-
-## Directory Structure
+## Project Structure
 
 ```
-semantic_representation/
-│
-├── README.md                           # This file
-├── requirements.txt                    # Python dependencies
-├── .env                               # Environment variables
-│
-├── config/
-│   ├── settings.py                   # Global configuration (device, tokens, temperature)
-│   └── model_config.py               # Model paths and hyperparameters
-│
-├── data/
-│   ├── prompts/
-│   │   └── prompts.json              # Input prompts
-│   ├── raw_outputs/                  # Stage 1 output (LLM responses)
-│   │   ├── llama_outputs.json
-│   │   ├── mistral_outputs.json
-│   │   └── phi_outputs.json
-│   └── processed/
-│       ├── embeddings/               # Stage 2 output (.npy files)
-│       └── faiss/                    # Stage 3 output (indexes)
-│
-├── pipelines/                         # Core execution scripts
-│   ├── run_generation.py             # Stage 1: Generate LLM responses
-│   ├── run_embeddings.py             # Stage 2: Embed responses
-│   ├── run_faiss.py                  # Stage 3: Build FAISS indexes
-│   └── run_analysis.py               # Stage 4a: Compute distances
-│
-├── llm/                               # LLM model loaders
-│   ├── llama_generator.py
-│   ├── mistral_generator.py
-│   └── phi_generator.py
-│
-├── embeddings/                        # Embedding model wrappers
-│   └── base_embedder.py              # Base class for embedding models
-│
-├── vectorstore/                       # Retrieval utilities
-│   ├── faiss_manager.py
-│   └── retrieval.py
-│
-├── visualization/                     # Stage 4b: Plotting
-│   ├── bar_chart.py
-│   ├── heatmap.py
-│   └── umap_plot.py
-│
-├── analysis/                          # Analysis utilities
-│   ├── similarity_analysis.py
-│   ├── distance.py
-│   ├── statistics.py
-│   └── embedding_statistics.py
-│
-├── utils/                             # Helper utilities
-│   ├── norm_utils.py                 # Verify unnormalized embeddings
-│   └── ...
-│
-├── results/                           # Final outputs
-│   ├── similarities/                 # Distance metrics (JSON)
-│   └── figures/                      # Visualizations (PNG)
-│
-├── progress_meeting/                  # Standalone research experiments
-│   ├── run_embeddings.py
-│   ├── heatmap.py
-│   ├── pca.py
-│   └── graphs.py
-│
-└── aporia/                            # APORIA framework (separate branch)
-    └── ...
+KMeanCluster/
+├── run_embeddings.py          # Single embedder pipeline (MiniLM only)
+├── run_embeddings2.py         # Multi-embedder pipeline (MiniLM, BGE, E5)
+├── pca_kmean.py               # K-Means + PCA for unified dataset
+├── pca_kmean2.py              # K-Means + PCA with grouped analysis
+└── data/
+    ├── raw_inputs/            # Input JSON files
+    │   ├── online_prompts.json # Online dataset with multiple LLM responses
+    │   └── constraint_prompts/
+    │       ├── C1.json         # Constraint group 1
+    │       ├── C2.json         # Constraint group 2
+    │       └── C3.json         # Constraint group 3
+    └── processed/
+        ├── embeddings_norm/    # Normalized embedding vectors (.npy files)
+        ├── embeddings_unnorm/  # Unnormalized embedding vectors (.npy files)
+        └── plots/              # Generated visualizations
 ```
 
----
+## Installation
 
-## Quick Start
+### Requirements
 
-### Prerequisites
+- Python 3.8+
+- NumPy
+- Matplotlib
+- Scikit-learn
+- Sentence Transformers (for embeddings)
 
-- **Python:** 3.8+
-- **GPU:** NVIDIA CUDA-capable GPU with 16GB+ VRAM (recommended)
-- **CUDA:** Compatible CUDA and cuDNN installation
-
-### Installation
+### Setup
 
 ```bash
-# Clone repository
-git clone https://github.com/jawadghouri/semantic_representation.git
-cd semantic_representation
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
 # Install dependencies
-pip install -r requirements.txt
+pip install numpy matplotlib scikit-learn sentence-transformers
 
-# Configure environment
-echo "DEVICE=cuda" > .env
+# (Optional) Install BGE embedder
+pip install sentence-transformers[sentence-transformers]
+
+# (Optional) Install E5 embedder
+pip install sentence-transformers[sentence-transformers]
 ```
 
-### Running the Full Pipeline
+## Usage
 
+### Step 1: Generate Embeddings
+
+Choose based on your needs:
+
+#### Option A: Single Embedder (MiniLM)
 ```bash
-# Stage 1: Generate LLM responses (~30-45 minutes)
-python -m pipelines.run_generation
-
-# Stage 2: Embed responses (~10-15 minutes)
-python -m pipelines.run_embeddings
-
-# Stage 3: Build FAISS indexes (~2-5 minutes)
-python -m pipelines.run_faiss
-
-# Stage 4: Analyze and visualize (~5 minutes)
-python -m pipelines.run_analysis
-python -m pipelines.run_visualization
+python run_embeddings.py
 ```
 
-**Total runtime:** ~60 minutes on single GPU
+This processes C1, C2, and C3 constraint datasets using only the MiniLM embedder.
 
-### Viewing Results
-
+#### Option B: Multi-Embedder
 ```bash
-# View computed distances
-cat results/similarities/*.json
-
-# View generated charts
-ls -lh results/figures/
-open results/figures/bar_charts/  # or view in image viewer
+python run_embeddings2.py
 ```
 
----
+This processes C1, C2, C3, and the online prompts dataset (A) using three embedders: MiniLM, BGE, and E5.
 
-## Key Design Decisions
+**Output**: Individual `.npy` files in `data/processed/embeddings_norm/` and `data/processed/embeddings_unnorm/`
 
-### 1. Unnormalized Embeddings
+### Step 2: Cluster and Visualize
 
-**Decision:** Keep embeddings as raw L2-norm vectors (not normalized to unit sphere)
-
-**Rationale:**
-- Enables geometric analysis of response clustering
-- Euclidean distance naturally captures embedding magnitude
-- Preserves semantic density information in embedding space
-
-**Verification:** Run `python -c "from utils.norm_utils import verify_unnormalized; verify_unnormalized()"`
-
-### 2. Three Embedding Models
-
-**Decision:** Test framework across MiniLM (small), BGE (medium), E5 (large)
-
-**Rationale:**
-- Shows robustness across embedding dimensions (384 → 768 → 1024)
-- Validates semantic relationships are not dimension-specific
-- Enables comparison of embedding model impacts
-
-### 3. Sequential Model Loading
-
-**Decision:** Load/unload LLM one at a time to manage VRAM
-
-**Rationale:**
-- Three 8B models = ~16GB VRAM each
-- Sequential prevents OOM errors on 24GB GPUs
-- Negligible runtime overhead vs. GPU memory constraints
-
-### 4. Euclidean Distance Metric
-
-**Decision:** Use Euclidean L2 distance instead of cosine similarity
-
-**Rationale:**
-- Analyzes actual geometric distances in embedding space
-- Captures response clustering patterns
-- Foundation for future Fisher projection analysis
-
----
-
-## Understanding the Output
-
-### Similarity Metrics (results/similarities/)
-
-Each JSON file contains distance computations between prompt embedding and response embeddings:
-
-```json
-{
-  "prompt": "Explain how a car engine works.",
-  "embedder": "all-MiniLM-L6-v2",
-  "llama": {
-    "mean_distance": 4.23,
-    "std_distance": 0.45,
-    "min_distance": 3.12,
-    "max_distance": 5.67
-  },
-  "mistral": { ... },
-  "phi": { ... }
-}
+#### Option A: Unified Analysis
+```bash
+python pca_kmean.py
 ```
 
-**Interpretation:**
-- **Lower distance** = response is semantically closer to prompt
-- **Smaller std** = responses are more consistent (clustered)
-- **Larger std** = responses are more diverse (spread)
+This performs K-Means clustering on all embeddings combined and produces visualizations.
 
-### Visualizations (results/figures/)
+#### Option B: Grouped Analysis
+```bash
+python pca_kmean2.py
+```
 
-1. **Bar Charts:** Compare mean distances across models/embedders
-2. **Heatmaps:** Show response clustering patterns (darker = tighter clustering)
-3. **UMAP Plots:** Visual 2D projection of semantic space
+This groups embeddings by prefix (R1-R9 grouped, A1-A9 separate per model) and performs clustering within each group.
 
----
-
-## Performance Metrics
-
-### Runtime Breakdown
-
-| Stage | Duration | Primary Bottleneck |
-|-------|----------|-------------------|
-| 1. Generation | 30-45 min | LLM inference (sequential) |
-| 2. Embedding | 10-15 min | Transformer encoding |
-| 3. FAISS | 2-5 min | Index construction |
-| 4. Analysis | <1 min | Distance computation |
-| 5. Visualization | <1 min | PNG generation |
-| **Total** | **~60 min** | Stage 1 (LLM inference) |
-
-### Memory Requirements
-
-| Component | VRAM | System RAM |
-|-----------|------|-----------|
-| LLM Model | ~16 GB | - |
-| Embedder Model | ~2 GB | - |
-| Embeddings (.npy) | - | ~500 MB |
-| FAISS indexes | - | ~300 MB |
-
----
+**Output**: 2D and 3D plots saved to `data/processed/plots/`
 
 ## Configuration
 
-Edit `config/settings.py` to customize:
+### Embedding Pipeline (`run_embeddings.py`, `run_embeddings2.py`)
+
+The scripts automatically load embedding models and process all JSON files in the input directories.
+
+**Supported Input JSON Formats**:
+
+1. **Single Response**:
+   ```json
+   {
+     "id": "unique_id",
+     "response": "text content..."
+   }
+   ```
+
+2. **Multiple Responses (List)**:
+   ```json
+   {
+     "id": "unique_id",
+     "responses": ["text1", "text2", ...]
+   }
+   ```
+
+3. **Multi-Model Responses**:
+   ```json
+   {
+     "id": "unique_id",
+     "prompt": "question...",
+     "responses": {
+       "chatgpt": "response1...",
+       "claude": "response2...",
+       ...
+     }
+   }
+   ```
+
+### Clustering Configuration (`pca_kmean.py`, `pca_kmean2.py`)
+
+Edit the configuration section at the top of either script:
 
 ```python
-DEVICE = "cuda"              # or "cpu"
-MAX_NEW_TOKENS = 200         # Response length
-TEMPERATURE = 0.7            # Randomness (0=deterministic, 1=random)
-LLM_MODELS = [               # Which LLMs to use
-    "meta-llama/Llama-3.1-8B-Instruct",
-    "mistralai/Mistral-7B-Instruct-v0.2",
-    "microsoft/Phi-3-mini-4k-instruct"
-]
-EMBEDDING_MODELS = [         # Which embedders to use
-    "all-MiniLM-L6-v2",
-    "BAAI/bge-base-en-v1.5",
-    "intfloat/e5-large-v2"
-]
+# Select embedding type
+EMBEDDING_TYPE = "unnormalized"  # Options: "normalized", "unnormalized"
+
+# Number of clusters
+K = 3  # Adjust based on data characteristics
+
+# Visual settings
+REGION_STD = 2.0              # Covariance ellipse/ellipsoid size (in std devs)
+REGION_ALPHA_2D = 0.15        # 2D region transparency
+REGION_ALPHA_3D = 0.12        # 3D region transparency
+POINT_SIZE = 100              # Scatter point size
+POINT_ALPHA = 0.85            # Point transparency
 ```
 
----
+## Data Formats
 
-## Extending the Project
+### Input Data (JSON)
 
-### Adding New Prompts
+#### Online Prompts (`online_prompts.json`)
+Contains miscellaneous prompts with responses from 5 LLMs (ChatGPT, Gemini, Claude, Grok, DeepSeek). Used for broad behavioral analysis.
 
-1. Edit `data/prompts/prompts.json`:
+**Sample Structure**:
 ```json
-[
-  {
-    "id": "P1",
-    "prompt": "Your question here"
-  },
-  ...
-]
-```
-
-2. Re-run pipeline from Stage 1
-
-### Using Different Models
-
-Edit `config/settings.py` to specify different LLMs or embedders
-
-### Custom Analysis
-
-Extend `analysis/` modules to compute additional metrics:
-- Semantic diversity measures
-- Response coherence scores
-- Topic clustering analysis
-
----
-
-## Troubleshooting
-
-### CUDA Out of Memory
-
-**Solution:** Edit `config/settings.py`, reduce `MAX_NEW_TOKENS` or use smaller models
-
-### Slow Embedding Generation
-
-**Solution:** Use smaller embedder (MiniLM instead of E5) or reduce batch size
-
-### Missing Transformer Models
-
-**Solution:** Models auto-download on first run. Ensure internet connection during Stage 2
-
-### File Permission Errors
-
-**Solution:** Ensure write permissions on `data/` and `results/` directories
-
----
-
-## Related Work
-
-This project is inspired by:
-- **APORIA** (arXiv:2602.14778): Hallucination detection via geometric clustering
-- Embedding space analysis for semantic similarity
-- LLM response diversity measurement
-
-See the `aporia` branch for the full APORIA framework implementation (225 responses, hallucination detection, Fisher projection).
-
----
-
-## Project Status
-
-- ✅ **Main branch:** Core 4-stage pipeline (text generation → embedding → indexing → analysis)
-- ✅ **Data:** Configuration and prompt management
-- ✅ **Visualization:** Publication-ready charts and plots
-- ⏳ **APORIA branch:** Advanced hallucination detection framework (separate branch)
-
----
-
-## Contributors
-
-- Talha Hussain Qureshi (talhahussain847@gmail.com)
-
----
-
-## License
-
-[Add license information]
-
----
-
-## Citation
-
-If you use this project, please cite:
-
-```bibtex
-@project{semantic_representation_2026,
-  title={Semantic Representation of LLM Outputs},
-  author={Qureshi, Talha Hussain},
-  year={2026},
-  url={https://github.com/jawadghouri/semantic_representation}
+{
+  "id": "A1",
+  "prompt": "What happens to you if you eat watermelon seeds?",
+  "category": "Misconceptions",
+  "responses": {
+    "chatgpt": "...",
+    "gemini": "...",
+    ...
+  }
 }
 ```
 
+#### Constraint Prompts (C1, C2, C3)
+Carefully designed datasets to test semantic similarity under different conditions:
+
+- **C1**: Similar context, different synonyms (testing synonym handling)
+- **C2**: Different context, similar wording (testing context awareness)
+- **C3**: Different context, different wording (baseline dissimilarity)
+
+**Sample Structure**:
+```json
+{
+  "id": "R1",
+  "constraint": "similar context, different synonyms",
+  "response": "text content..."
+}
+```
+
+### Output Data (Embeddings)
+
+Embeddings are stored as NumPy arrays (`.npy` files) with shape `(384,)`, `(768,)`, or `(1024,)` depending on the embedder model.
+
+**Naming Convention**:
+```
+{id}_{embedder}.npy              # Unnormalized
+{id}_{embedder}_norm.npy         # Normalized
+```
+
+**Example**: `A1_minilm.npy`, `R1_bge_norm.npy`
+
+## Output Visualization
+
+Generated plots include:
+
+1. **2D Scatter Plot**
+   - PCA reduction to 2 dimensions
+   - Color-coded clusters
+   - Covariance ellipses showing cluster regions
+
+2. **3D Scatter Plot**
+   - PCA reduction to 3 dimensions
+   - Color-coded clusters
+   - Covariance ellipsoids showing cluster regions
+
+Both plots display point labels (item IDs) for reference.
+
+## Algorithm Details
+
+### K-Means Clustering
+
+- **Input**: N × D embedding matrix (original dimensions)
+- **Process**: Iterative clustering with k-means++ initialization
+- **Output**: Cluster labels for each embedding
+
+```
+Configuration: random_state=42, n_init=10
+```
+
+### PCA Visualization
+
+- **Input**: N × D embedding matrix
+- **Output**: 
+  - 2D: N × 2 coordinates
+  - 3D: N × 3 coordinates
+
+**Important**: PCA is applied ONLY for visualization. Clustering is performed in the original high-dimensional space.
+
+### Covariance Regions
+
+For each cluster in PCA space:
+1. Calculate cluster center (mean of points)
+2. Compute covariance matrix
+3. Perform eigenvalue decomposition
+4. Draw ellipse/ellipsoid with size proportional to eigenvalues
+
+Size is controlled by `REGION_STD` (typically 2.0 = ±2 standard deviations).
+
+## Troubleshooting
+
+### Issue: Missing embedding files
+**Solution**: Ensure `run_embeddings2.py` has been executed successfully and check that `data/processed/embeddings_unnorm/` or `data/processed/embeddings_norm/` contains `.npy` files.
+
+### Issue: K > number of samples
+**Solution**: The scripts automatically clamp K to the number of available samples. Consider running `pca_kmean2.py` for group-based analysis instead.
+
+### Issue: Empty plots
+**Solution**: Verify that embeddings were generated correctly and stored in the expected directories. Check console output for warnings.
+
+## References
+
+- [Sentence Transformers](https://www.sbert.net/) - Embedding models
+- [Scikit-learn K-Means](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
+- [Scikit-learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
+
+## License
+
+This project is part of the Semantic Representation research initiative.
+
 ---
 
-## Contact & Support
-
-For questions or issues:
-- Email: talhahussain847@gmail.com
-- GitHub Issues: [Link to issue tracker]
-
----
-
-**Last Updated:** August 6, 2026  
-**Branch:** main  
-**Status:** Active Development
+**Questions?** Check the inline documentation in each Python script or review the project configuration sections above.
