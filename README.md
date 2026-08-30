@@ -1,4 +1,4 @@
-# K-Means Clustering with PCA Visualization
+# Sementic Analysis of LLM Outputs
 
 A comprehensive pipeline for analyzing LLM response embeddings using K-Means clustering and Principal Component Analysis (PCA). This project generates embedding vectors from text responses, clusters them in high-dimensional space, and produces interactive 2D and 3D visualizations with covariance ellipses/ellipsoids.
 
