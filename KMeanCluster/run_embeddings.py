@@ -1,15 +1,6 @@
-##
-# This generates embedding files for each response in the constraint prompts.
-# It handles both normalized and unnormalized embeddings,
-# saving the resulting embeddings to specified directories.
-##
-
-from http.client import responses
-
+import os
 from embeddings.minilm_embedder import MiniLMEmbedder
-
 from utils.io_utils import load_json, save_numpy
-
 from utils.norm_utils import check_embeddings_normalization
 
 # ---------------------------------------------------
@@ -17,11 +8,17 @@ from utils.norm_utils import check_embeddings_normalization
 # ---------------------------------------------------
 
 model_files = {
-    "C1": "KMeanCluster/data/raw_inputs/constraint_prompts/C1.json",
-    "C2": "KMeanCluster/data/raw_inputs/constraint_prompts/C2.json",
-    "C3": "KMeanCluster/data/raw_inputs/constraint_prompts/C3.json"
+    # 1. Constraint Prompt files (R*)
+    "C1": "data/raw_inputs/constraint_prompts/C1.json",
+    "C2": "data/raw_inputs/constraint_prompts/C2.json",
+    "C3": "data/raw_inputs/constraint_prompts/C3.json",
+    
+    # 2. LLM Benchmark files (A*)
+     "A_responses": "data/raw_inputs/online_prompts.json",
+    
+    # 3. Ground Truth files (V* linked to A*)
+     "V_ground_truth": "data/raw_inputs/ground_truth.json",
 }
-
 
 # ---------------------------------------------------
 # LOAD EMBEDDERS
@@ -31,82 +28,65 @@ embedders = {
     "minilm": MiniLMEmbedder(),
 }
 
-
 # ---------------------------------------------------
-# PROCESS EACH LLM OUTPUT
+# PROCESS EACH FILE
 # ---------------------------------------------------
 
-for constraint, filepath in model_files.items():
-
-    print(f"\nProcessing Constraint: {constraint}")
-
+for group_key, filepath in model_files.items():
+    print(f"\nProcessing File: {group_key} ({filepath})")
     data = load_json(filepath)
 
     texts = []
-    ids = []  # We will track the IDs parallel to the texts
+    ids = []
 
     for item in data:
-        item_id = item.get("id", "unknown_id")
+        # Case 1: Ground truth format -> {"id": "V1", "prompt_id": "A1", "correct_answer": "..."}
+        if "correct_answer" in item:
+            v_id = item.get("id", "V_unknown")
+            prompt_id = item.get("prompt_id", "A_unknown")
+            text = item["correct_answer"]
+            
+            if text:
+                texts.append(text)
+                ids.append(f"{v_id}_{prompt_id}_correctanswer")
 
-        # single response version
-        if "response" in item:
-            texts.append(item["response"])
-            ids.append(item_id)
+        # Case 2: LLM responses format -> {"id": "A1", "responses": {"chatgpt": "...", ...}}
+        elif isinstance(item.get("responses"), dict):
+            item_id = item.get("id", "unknown_id")
 
-        # multi-response version
-        elif "responses" in item:
-            for idx, response in enumerate(item["responses"]):
-                texts.append(response)
-                # Append an index to the ID so files don't overwrite each other
-                ids.append(f"{item_id}_{idx}")
+            for llm_name, response_text in item["responses"].items():
+                if response_text:
+                    texts.append(response_text)
+                    ids.append(f"{item_id}_{llm_name}")
 
-    print(f"Total texts: {len(texts)}")
+        # Case 3: Original constraint format -> {"id": "R1", "responses": [...] or "response": "..."}
+        else:
+            item_id = item.get("id", "unknown_id")
+            responses_field = item.get("responses")
 
+            if isinstance(responses_field, list):
+                for idx, response_text in enumerate(responses_field):
+                    if response_text:
+                        texts.append(response_text)
+                        ids.append(f"{item_id}_{idx}")
+            elif "response" in item and item["response"]:
+                texts.append(item["response"])
+                ids.append(f"{item_id}_response")
+
+    print(f"Total texts to embed: {len(texts)}")
 
     # ---------------------------------------------------
-    # RUN EACH EMBEDDING MODEL
+    # RUN UNNORMALIZED EMBEDDINGS
     # ---------------------------------------------------
-
     for embed_name, embedder in embedders.items():
-
-        print(f"\nEmbedding with: {embed_name}")
-
-        # Batch encode all texts for this JSON at once (much faster)
-        # Returns a numpy matrix of shape (num_texts, embedding_dim)
+        print(f"Embedding with: {embed_name}")
         embeddings = embedder.encode(texts)
 
-        # Iterate through the embedded matrix and save them individually
-        for item_id, single_embedding in zip(ids, embeddings):
-            
-            output_path = f"KMeanCluster/data/processed/embeddings_unnorm/{item_id}_{embed_name}.npy"
-            
-            # Save the individual 1D array (shape: embedding_dim,)
+        for text_id, single_embedding in zip(ids, embeddings):
+            output_path = f"data/processed/embeddings_unnorm/{text_id}_{embed_name}.npy"
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
             save_numpy(single_embedding, output_path)
 
-        print(f"Saved {len(ids)} individual files for {embed_name} (Constraint: {constraint})")
-
-    # ---------------------------------------------------
-    # RUN EACH EMBEDDING MODEL (NORMALIZED)
-    # ---------------------------------------------------
-
-    for embed_name, embedder in embedders.items():
-        print(f"\nEmbedding with: {embed_name} (NORMALIZED)")
-
-        embeddings = embedder.encode(
-            texts, 
-            normalize_embeddings=True 
-        )
-
-        for item_id, single_embedding in zip(ids, embeddings):
-            # Save to a new folder to avoid overwriting your unnormalized data
-            output_path = f"KMeanCluster/data/processed/embeddings_norm/{item_id}_{embed_name}_norm.npy"
-            
-            save_numpy(single_embedding, output_path)
-
-        print(f"Saved {len(ids)} normalized files for {embed_name}")
-
-
-check_embeddings_normalization("KMeanCluster/data/processed/embeddings_norm/")
-check_embeddings_normalization("KMeanCluster/data/processed/embeddings_unnorm/")
+check_embeddings_normalization("data/processed/embeddings_unnorm/")
 
 print("\nEmbedding pipeline complete.")
