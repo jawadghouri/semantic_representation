@@ -1,11 +1,5 @@
 torch
 transformers
-accelerate
-sentencepiece
-sentence-transformers
 numpy
-scikit-learn
 matplotlib
 tqdm
-scipy
-pandas
