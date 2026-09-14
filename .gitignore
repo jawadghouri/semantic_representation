@@ -134,3 +134,6 @@ results/metrics/*
 results/summaries/*
 !results/summaries/.gitkeep
 
+
+data/processed/*
+!data/processed/.gitkeep
